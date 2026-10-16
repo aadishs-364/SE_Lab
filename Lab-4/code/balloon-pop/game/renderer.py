@@ -16,6 +16,20 @@ def draw_scene(surface, balloons):
     for b in balloons:
         pygame.draw.circle(surface, b.color, (int(b.x), int(b.y)), b.radius)
         pygame.draw.line(surface, (120, 120, 120), (b.x, b.y + b.radius), (b.x, b.y + b.radius + 12), 2)
+        # Mark special balloons with +/- so they're readable without relying on color alone.
+        if b.kind != "normal":
+            pygame.draw.line(surface, (255, 255, 255), (b.x - 6, b.y), (b.x + 6, b.y), 3)
+        if b.kind == "bonus":
+            pygame.draw.line(surface, (255, 255, 255), (b.x, b.y - 6), (b.x, b.y + 6), 3)
+
+
+def draw_legend(surface, font, types):
+    """Small key in the top-right showing each balloon color and its points."""
+    x = surface.get_width() - 150
+    for i, (kind, (points, color)) in enumerate(types.items()):
+        y = 14 + i * 24
+        pygame.draw.circle(surface, color, (x, y + 8), 8)
+        draw_text(surface, font, f"{kind} {points:+d}", (x + 14, y))
 
 
 def draw_text(surface, font, text, pos, color=COLOR_TEXT):
