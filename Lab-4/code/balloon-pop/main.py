@@ -4,6 +4,7 @@ Balloon Pop (Lab Starter)
 Run with:  python3 main.py
 
 Click balloons to pop them before they reach the bottom.
+Pink = +10, gold = +30, grey = -20. 3 lives, 30-second round, R to restart.
 """
 
 import pygame
@@ -27,6 +28,8 @@ def main():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 engine.handle_click(event.pos)
+            elif event.type == pygame.KEYDOWN:
+                engine.handle_keydown(event.key)
 
         engine.update()
         engine.draw(screen, font)

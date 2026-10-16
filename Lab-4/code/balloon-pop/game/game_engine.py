@@ -8,6 +8,8 @@ lives system yet, no timer yet. Click detection also has a known bug
 
 import random
 
+import pygame
+
 from game.balloon import Balloon, BALLOON_TYPES
 from game.click_detection import check_pop
 from game.renderer import WIDTH, HEIGHT
@@ -16,6 +18,8 @@ SPAWN_INTERVAL_FRAMES = 45
 # Spawn odds per balloon type: mostly normal, some bonus, some penalty.
 TYPE_WEIGHTS = {"normal": 70, "bonus": 15, "penalty": 15}
 STARTING_LIVES = 3
+FPS = 60
+ROUND_FRAMES = 30 * FPS   # 30-second round, counted in frames (main loop runs at 60 FPS)
 
 
 class GameEngine:
@@ -24,7 +28,14 @@ class GameEngine:
         self.frames_until_spawn = 0
         self.score = 0
         self.lives = STARTING_LIVES
+        self.frames_left = ROUND_FRAMES
         self.game_over = False
+        self.end_reason = ""
+
+    def handle_keydown(self, key):
+        # R starts a fresh round: score, lives and timer all reset.
+        if self.game_over and key == pygame.K_r:
+            self.__init__()
 
     def _spawn_balloon(self):
         radius = random.randint(16, 44)
@@ -45,6 +56,13 @@ class GameEngine:
         if self.game_over:
             return
 
+        self.frames_left -= 1
+        if self.frames_left <= 0:
+            self.frames_left = 0
+            self.game_over = True
+            self.end_reason = "Time's up!"
+            return
+
         self.frames_until_spawn -= 1
         if self.frames_until_spawn <= 0:
             self._spawn_balloon()
@@ -60,13 +78,19 @@ class GameEngine:
             self.lives = max(0, self.lives - len(escaped))
             if self.lives == 0:
                 self.game_over = True
+                self.end_reason = "Out of lives!"
 
     def draw(self, surface, font):
         from game import renderer
         renderer.draw_scene(surface, self.balloons)
         renderer.draw_text(surface, font, f"Score: {self.score}", (10, 10))
         renderer.draw_text(surface, font, f"Lives: {self.lives}/{STARTING_LIVES}", (10, 36), (200, 40, 60))
+        seconds = -(-self.frames_left // FPS)   # ceil, so the display reads 30..1 then 0
+        renderer.draw_text(surface, font, f"Time: {seconds}s", (10, 62), (180, 40, 40) if seconds <= 5 else renderer.COLOR_TEXT)
         renderer.draw_legend(surface, font, BALLOON_TYPES)
 
         if self.game_over:
-            renderer.draw_banner(surface, font, f"Game Over! Final score: {self.score}")
+            renderer.draw_banner(surface, font, [
+                f"{self.end_reason}  Final score: {self.score}",
+                "Press R to play a new round",
+            ])

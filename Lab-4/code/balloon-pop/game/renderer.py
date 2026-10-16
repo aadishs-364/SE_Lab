@@ -36,7 +36,13 @@ def draw_text(surface, font, text, pos, color=COLOR_TEXT):
     surface.blit(font.render(text, True, color), pos)
 
 
-def draw_banner(surface, font, text):
-    surf = font.render(text, True, (180, 40, 40))
-    rect = surf.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2))
-    surface.blit(surf, rect)
+def draw_banner(surface, font, lines):
+    """Centered panel with one or more lines of text (used for the end-of-round screen)."""
+    w, h = surface.get_width(), surface.get_height()
+    panel = pygame.Rect(0, 0, w - 120, 40 + 32 * len(lines))
+    panel.center = (w // 2, h // 2)
+    pygame.draw.rect(surface, (255, 255, 255), panel, border_radius=10)
+    pygame.draw.rect(surface, (180, 40, 40), panel, width=3, border_radius=10)
+    for i, line in enumerate(lines):
+        surf = font.render(line, True, (180, 40, 40))
+        surface.blit(surf, surf.get_rect(center=(w // 2, panel.top + 36 + 32 * i)))
