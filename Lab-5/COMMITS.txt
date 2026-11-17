@@ -1,0 +1,7 @@
+Three local commits after the original starter:
+
+33c8db5 Fix Flake8 formatting and document verified analysis results
+4b468b0 Fix Pylint findings and validate order and persistence behavior
+a8c1d2b Fix Bandit findings: replace pickle and report missing orders
+
+Not pushed to GitHub. See SUBMISSION_GUIDE.md for bundle recovery and publishing.
